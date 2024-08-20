@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\v1\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +15,36 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::get('/v1', function () {
+    return response()->json(['message' => 'Hello World!']);
+});
+
+/**
+ *  API Version 1
+ */
+Route::group(['prefix' => 'v1'], function () {
+    
+    /**
+     * Guest Routes
+     */
+    Route::group(['middleware' => 'guest'], function () {
+    
+        /**
+         * Auth Routes
+         */
+        Route::post('/register', [AuthController::class, 'register']);
+        Route::post('/login', [AuthController::class, 'login']);
+    });
+    
+    /**
+     * Authenticated Routes
+     */
+    Route::group(['middleware' => 'auth:sanctum'], function () {
+    
+        /**
+         * Auth Routes
+         */
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/logout/all', [AuthController::class, 'globalLogout']);
+    });
 });
