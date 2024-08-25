@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\v1\Auth\LoginRequest;
 use App\Http\Requests\v1\Auth\RegisterRequest;
 use App\Models\User;
+use App\Models\v1\Role;
 class AuthController extends Controller
 {
     /**
@@ -16,8 +17,9 @@ class AuthController extends Controller
         $credentials = $request->validated();
         if (auth()->attempt($credentials)){
             $user = auth()->user();
-            $token = $user->createToken('authToken')->plainTextToken;
-            return response()->json(['user'=>$user ,'token' => $token], 200);
+            $permissions = $user->role->permissions ?? ['*'];
+            $token = $user->createToken('authToken',$permissions)->plainTextToken;
+            return response()->json(['user'=>$user->load('role') ,'token' => $token], 200);
         } else {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
@@ -45,8 +47,10 @@ class AuthController extends Controller
     public function register(RegisterRequest $request){
         $data = $request->validated();
         $data['password'] = bcrypt($data['password']);
+        $data['role_id'] = Role::where('name','user')->first()->id;
         $user = User::create($data);
-        $token = $user->createToken('authToken')->plainTextToken;
-        return response()->json(['user'=>$user ,'token' => $token], 201);
+        $userData = $user->load('role');
+        $token = $user->createToken('authToken',json_decode($userData->role->permissions,true))->plainTextToken;
+        return response()->json(['user'=> $userData,'token' => $token], 201);
     }
 }

@@ -17,7 +17,13 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->word,
+            'slug' => $this->faker->slug,
+            'cover' => $this->faker->imageUrl(),
+            'meta' => $this->faker->text,
+            'description' => $this->faker->text,
+            'status' => $this->faker->boolean,
+            'parent_id' => null
         ];
     }
 }
