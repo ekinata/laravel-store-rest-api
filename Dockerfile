@@ -1,5 +1,5 @@
 # Use the official PHP image with the necessary extensions
-FROM php:8.2-fpm
+FROM php:8.2
 
 # Set working directory
 WORKDIR /var/www/html
@@ -30,6 +30,9 @@ RUN composer install --no-dev --optimize-autoloader
 # Set appropriate permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Expose port 9000 and start the PHP-FPM server
-EXPOSE 9000
-CMD ["php-fpm"]
+COPY .env.docker .env
+
+# Expose port 8000 and start PHP server
+EXPOSE 8000
+
+CMD ["sh","startup.sh"]
